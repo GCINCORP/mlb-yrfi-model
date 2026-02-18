@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLB First Inning Data Scraper Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #2d3748;
+            font-size: 22px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: #667eea;
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .button.secondary {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+        
+        .button.danger {
+            background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+        }
+        
+        .output {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #2d3748;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+        
+        .status.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-actions button {
+            flex: 1;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚾ MLB First Inning Prediction Model</h1>
+            <p class="subtitle">Data Collection & Analysis Dashboard</p>
+        </div>
+
+        <!-- Quick Start Section -->
+        <div class="card">
+            <h2>🚀 Quick Start</h2>
+            <p style="color: #718096; margin-bottom: 20px;">
+                New here? Click these buttons to collect sample data and see how it works!
+            </p>
+            <div class="quick-actions">
+                <button class="button" onclick="quickTestBraves()">
+                    Test with Braves Games
+                </button>
+                <button class="button secondary" onclick="quickAnalyze()">
+                    Analyze Sample Data
+                </button>
+            </div>
+            <div id="quick-output" class="output" style="display: none;"></div>
+        </div>
+
+        <!-- Game Data Collection -->
+        <div class="card">
+            <h2>📊 Collect Game Data <span class="badge">Step 1</span></h2>
+            <div class="form-group">
+                <label for="season">Season Year</label>
+                <select id="season">
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="team">Team (Optional - leave blank for all teams)</label>
+                <select id="team">
+                    <option value="">All Teams</option>
+                    <option value="144">Atlanta Braves</option>
+                    <option value="147">New York Yankees</option>
+                    <option value="119">Los Angeles Dodgers</option>
+                    <option value="121">New York Mets</option>
+                    <option value="143">Philadelphia Phillies</option>
+                    <option value="111">Boston Red Sox</option>
+                    <option value="117">Houston Astros</option>
+                    <option value="137">San Francisco Giants</option>
+                    <option value="108">Los Angeles Angels</option>
+                    <option value="135">San Diego Padres</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="max-games">Max Games (Optional - for testing)</label>
+                <input type="number" id="max-games" placeholder="Leave blank for full season">
+            </div>
+            
+            <button class="button" onclick="collectGameData()">
+                🎯 Collect Game Data
+            </button>
+            
+            <div id="game-output" class="output" style="display: none;"></div>
+            <div id="game-status"></div>
+        </div>
+
+        <!-- Baseball Savant Scraping -->
+        <div class="card">
+            <h2>🎯 Baseball Savant Data <span class="badge">Step 2</span></h2>
+            
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 10px; color: #4a5568;">Single Pitcher Analysis</h3>
+                <div class="form-group">
+                    <label for="pitcher-name">Pitcher Name</label>
+                    <input type="text" id="pitcher-name" placeholder="e.g., Chris Sale">
+                </div>
+                <button class="button" onclick="analyzePitcher()">
+                    📈 Analyze Pitcher
+                </button>
+            </div>
+            
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;">
+            
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 10px; color: #4a5568;">Single Batter Analysis</h3>
+                <div class="form-group">
+                    <label for="batter-name">Batter Name</label>
+                    <input type="text" id="batter-name" placeholder="e.g., Ronald Acuna Jr">
+                </div>
+                <button class="button" onclick="analyzeBatter()">
+                    🏏 Analyze Batter
+                </button>
+            </div>
+            
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;">
+            
+            <div>
+                <h3 style="font-size: 16px; margin-bottom: 10px; color: #4a5568;">Full Matchup Analysis</h3>
+                <div class="form-group">
+                    <label for="matchup-pitcher">Starting Pitcher</label>
+                    <input type="text" id="matchup-pitcher" placeholder="e.g., Chris Sale">
+                </div>
+                <div class="form-group">
+                    <label for="batter1">Top of Order - Batter #1</label>
+                    <input type="text" id="batter1" placeholder="e.g., Kyle Schwarber">
+                </div>
+                <div class="form-group">
+                    <label for="batter2">Top of Order - Batter #2</label>
+                    <input type="text" id="batter2" placeholder="e.g., Bryce Harper">
+                </div>
+                <div class="form-group">
+                    <label for="batter3">Top of Order - Batter #3</label>
+                    <input type="text" id="batter3" placeholder="e.g., Matt Olson">
+                </div>
+                <button class="button secondary" onclick="analyzeMatchup()">
+                    ⚡ Analyze Full Matchup
+                </button>
+            </div>
+            
+            <div id="savant-output" class="output" style="display: none;"></div>
+            <div id="savant-status"></div>
+        </div>
+
+        <!-- Data Analysis -->
+        <div class="card">
+            <h2>📈 Analyze Collected Data <span class="badge">Step 3</span></h2>
+            <div class="form-group">
+                <label for="data-file">Data File to Analyze</label>
+                <input type="text" id="data-file" placeholder="mlb_data/first_inning_data_2024.csv">
+            </div>
+            
+            <button class="button secondary" onclick="analyzeData()">
+                🔍 Run Analysis
+            </button>
+            
+            <div id="analysis-output" class="output" style="display: none;"></div>
+            <div id="analysis-status"></div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="card">
+            <h2>📚 Instructions</h2>
+            <div style="color: #4a5568; line-height: 1.8;">
+                <h3 style="margin: 15px 0 10px 0; color: #2d3748;">Getting Started:</h3>
+                <ol style="padding-left: 20px;">
+                    <li><strong>Install Python</strong> (if you haven't): Download from python.org</li>
+                    <li><strong>Install libraries</strong>: Open terminal and run:<br>
+                        <code style="background: #f7fafc; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0;">pip install requests pandas matplotlib seaborn beautifulsoup4</code>
+                    </li>
+                    <li><strong>Save this HTML file</strong> and the Python scripts in the same folder</li>
+                    <li><strong>Open this file</strong> in your web browser and click the buttons!</li>
+                </ol>
+
+                <h3 style="margin: 15px 0 10px 0; color: #2d3748;">Workflow:</h3>
+                <ol style="padding-left: 20px;">
+                    <li><strong>Step 1:</strong> Collect game data (start with test data, 10-20 games)</li>
+                    <li><strong>Step 2:</strong> (Optional) Get Baseball Savant pitch-level data</li>
+                    <li><strong>Step 3:</strong> Analyze the data to find patterns</li>
+                    <li><strong>Step 4:</strong> Build prediction model (coming next!)</li>
+                </ol>
+
+                <div class="status info" style="margin-top: 20px;">
+                    <strong>💡 Pro Tip:</strong> Start with "Quick Start" buttons to test everything works!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to show output
+        function showOutput(elementId, text, isError = false) {
+            const outputEl = document.getElementById(elementId);
+            outputEl.textContent = text;
+            outputEl.style.display = 'block';
+            outputEl.style.borderColor = isError ? '#fc8181' : '#e2e8f0';
+        }
+
+        // Helper function to show status
+        function showStatus(elementId, message, type = 'info') {
+            const statusEl = document.getElementById(elementId);
+            statusEl.className = `status ${type}`;
+            statusEl.textContent = message;
+            statusEl.style.display = 'block';
+        }
+
+        // Quick test functions
+        function quickTestBraves() {
+            const command = 'python mlb_first_inning_data_collector.py --season 2024 --team 144 --max-games 10';
+            showOutput('quick-output', `Running: ${command}\n\nThis will collect data for 10 Braves games from 2024...\n\n(In your terminal, run this command manually for now)`);
+            showStatus('game-status', '✅ Command generated! Copy and run it in your terminal.', 'success');
+        }
+
+        function quickAnalyze() {
+            const command = 'python mlb_first_inning_analyzer.py --data mlb_data/first_inning_data_2024.csv';
+            showOutput('quick-output', `Running: ${command}\n\nThis will analyze your collected data...\n\n(Run this command in your terminal after collecting data)`);
+            showStatus('analysis-status', '✅ Command generated! Run it after collecting data.', 'success');
+        }
+
+        // Main scraping functions
+        function collectGameData() {
+            const season = document.getElementById('season').value;
+            const team = document.getElementById('team').value;
+            const maxGames = document.getElementById('max-games').value;
+            
+            let command = `python mlb_first_inning_data_collector.py --season ${season}`;
+            
+            if (team) {
+                command += ` --team ${team}`;
+            }
+            
+            if (maxGames) {
+                command += ` --max-games ${maxGames}`;
+            }
+            
+            showOutput('game-output', `Command to run:\n\n${command}\n\nCopy this command and run it in your terminal/command prompt.`);
+            showStatus('game-status', '📋 Command ready! Copy and paste into your terminal.', 'info');
+        }
+
+        function analyzePitcher() {
+            const pitcher = document.getElementById('pitcher-name').value;
+            const season = document.getElementById('season').value;
+            
+            if (!pitcher) {
+                showStatus('savant-status', '❌ Please enter a pitcher name', 'error');
+                return;
+            }
+            
+            const command = `python baseball_savant_scraper.py --pitcher "${pitcher}" --season ${season}`;
+            showOutput('savant-output', `Command to run:\n\n${command}\n\nThis will fetch:\n- Pitch mix and usage rates\n- Effectiveness by pitch type\n- First inning vs later innings splits\n- First time through order stats`);
+            showStatus('savant-status', '📋 Command ready!', 'success');
+        }
+
+        function analyzeBatter() {
+            const batter = document.getElementById('batter-name').value;
+            const season = document.getElementById('season').value;
+            
+            if (!batter) {
+                showStatus('savant-status', '❌ Please enter a batter name', 'error');
+                return;
+            }
+            
+            const command = `python baseball_savant_scraper.py --batter "${batter}" --season ${season}`;
+            showOutput('savant-output', `Command to run:\n\n${command}\n\nThis will fetch:\n- Performance vs different pitch types\n- First inning batting stats\n- Splits vs LHP/RHP`);
+            showStatus('savant-status', '📋 Command ready!', 'success');
+        }
+
+        function analyzeMatchup() {
+            const pitcher = document.getElementById('matchup-pitcher').value;
+            const batter1 = document.getElementById('batter1').value;
+            const batter2 = document.getElementById('batter2').value;
+            const batter3 = document.getElementById('batter3').value;
+            const season = document.getElementById('season').value;
+            
+            if (!pitcher || !batter1 || !batter2 || !batter3) {
+                showStatus('savant-status', '❌ Please fill in all fields', 'error');
+                return;
+            }
+            
+            const command = `python baseball_savant_scraper.py --matchup --pitcher "${pitcher}" --batters "${batter1}" "${batter2}" "${batter3}" --season ${season}`;
+            showOutput('savant-output', `Command to run:\n\n${command}\n\nThis will analyze:\n- Pitcher's arsenal vs these specific batters\n- Each batter's performance vs pitcher's pitch types\n- First inning matchup probabilities`);
+            showStatus('savant-status', '📋 Full matchup analysis command ready!', 'success');
+        }
+
+        function analyzeData() {
+            const dataFile = document.getElementById('data-file').value || 'mlb_data/first_inning_data_2024.csv';
+            
+            const command = `python mlb_first_inning_analyzer.py --data ${dataFile}`;
+            showOutput('analysis-output', `Command to run:\n\n${command}\n\nThis will show:\n- Overall first inning scoring rates\n- Temperature correlation\n- Park factors\n- Team tendencies\n- Key insights for your model`);
+            showStatus('analysis-status', '📋 Analysis command ready!', 'success');
+        }
+    </script>
+</body>
+</html>
